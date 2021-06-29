@@ -31,6 +31,7 @@ export interface Form extends FormItem {
   parent: Form;
   fields: { [key: string]: Field };
   reset(): void;
+  merge(value): void;
   handleSubmit(e?: Event): void;
   handleSubmit(
     onSuccess: Callback2<any, Form>,
@@ -43,6 +44,8 @@ export interface Form extends FormItem {
 export interface Field {
   form: Form;
   comp: any;
+  value: any;
+  initialValue: any;
   name: string[];
   dirty: boolean;
   val: Validation;
@@ -52,6 +55,8 @@ export interface Field {
   labelProp: string;
   changeEvent: string;
   defaultValue: any;
+  getProps(valueProp?: string, changeEvent?: string): {};
+  handleChange(value?: any): void;
 }
 
 export type RenderFieldCallback = (

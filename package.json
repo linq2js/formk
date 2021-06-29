@@ -1,6 +1,6 @@
 {
   "name": "formk",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "A powerful form library for ReactJs/ReactNative",
   "main": "src/index.js",
   "types": "src/index.d.ts",
@@ -26,7 +26,8 @@
     "state",
     "react",
     "react-js",
-    "react-native"
+    "react-native",
+    "immutable"
   ],
   "jest": {
     "transform": {

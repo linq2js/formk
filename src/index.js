@@ -10,6 +10,7 @@ import Schema from "async-validator";
 
 const emptyObject = {};
 const stateHook = useState;
+const effectHook = useEffect;
 const defaultClasses = {
   form: "formk-form",
   field: "formk-field",
@@ -23,7 +24,7 @@ const defaultClasses = {
   errorList: "formk-error-list",
   required: "formk-required",
   busy: "formk-busy",
-  input: "formk-component",
+  input: "formk-input",
 };
 const defaultEvents = {
   change: "onChange",
@@ -148,6 +149,13 @@ const createForm = (parentForm, options) => {
         parentForm.fields[key] = form;
       }
 
+      effectHook(() => {
+        form.mounted = true;
+        return () => {
+          form.mounted = false;
+        };
+      }, [form]);
+
       return (
         <formContext.Provider value={{ form }}>
           {renderForm(form, children, options)}
@@ -193,6 +201,12 @@ const createForm = (parentForm, options) => {
       const value = getValue(form.value, nextFieldProps.name);
       const initialValue = getValue(form.initialValue, nextFieldProps.name);
       form.fields[key] = field;
+      effectHook(() => {
+        field.mounted = true;
+        return () => {
+          field.mounted = false;
+        };
+      }, [field]);
       Object.assign(field, nextFieldProps, {
         value,
         initialValue,
@@ -246,6 +260,10 @@ const createForm = (parentForm, options) => {
     updateForm(form.initialValue || emptyObject);
   };
 
+  const merge = (value) => {
+    updateForm({ ...form.value, ...value });
+  };
+
   const form = {
     type: "form",
     parent: parentForm,
@@ -263,6 +281,7 @@ const createForm = (parentForm, options) => {
     handleReset,
     updateField,
     updateForm,
+    merge,
     fields: {},
   };
   return form;
@@ -278,7 +297,7 @@ const performValidation = (obj, promiseFactory) => {
   obj.val = val;
   const rerender = () => {
     if (obj.val !== val) return;
-    obj.rerender({});
+    obj.mounted && obj.rerender({});
   };
   val.promise = promiseFactory(val).then((errors) => {
     val.errors = errors;
@@ -407,9 +426,21 @@ const createField = (form, options) => {
     get dirty() {
       return field.value !== field.initialValue;
     },
+    getProps(valueProp = "value", changeEvent = "onChange") {
+      return {
+        [valueProp]: field.value,
+        [changeEvent]: field.handleChange,
+      };
+    },
     handleChange(e) {
+      const isEventObject =
+        e &&
+        typeof e === "object" &&
+        "target" in e &&
+        "currentTarget" in e &&
+        "nativeEvent" in e;
       const value =
-        field.valueProp && e && typeof e === "object"
+        field.valueProp && isEventObject
           ? (e.target || e.currentTarget || e)[field.valueProp]
           : e;
       form.updateField(field, value);
@@ -419,7 +450,7 @@ const createField = (form, options) => {
           validate(field, options);
         }, options.autoValidateDelay);
       } else {
-        field.rerender({});
+        field.mounted && field.rerender({});
       }
     },
   };
@@ -447,14 +478,14 @@ const defaultRenderForm = (
     components: { form: Form },
   }
 ) => {
-  const formContent =
-    typeof children === "function" ? children(form) : children;
-
+  if (typeof children === "function") {
+    return children(form);
+  }
   if (form.parent) {
-    return formContent;
+    return children;
   }
 
-  if (!Form) return formContent;
+  if (!Form) return children;
   const formProps = mergeProps(
     form.props,
     [
@@ -470,7 +501,7 @@ const defaultRenderForm = (
     [submitEvent, form.handleSubmit]
   );
 
-  return <Form {...formProps}>{formContent}</Form>;
+  return <Form {...formProps}>{children}</Form>;
 };
 
 const defaultRenderField = (
@@ -494,6 +525,9 @@ const defaultRenderField = (
     },
   }
 ) => {
+  if (typeof children === "function") {
+    return children(field);
+  }
   const {
     form,
     label,
@@ -547,7 +581,7 @@ const defaultRenderField = (
         ...(field.classes || [])
       ),
     ],
-    [labelProp, labelText]
+    [typeof labelText !== "undefined" && labelProp, labelText]
   );
   const labelProps = mergeProps([!noExtraAttrs && "htmlFor", fieldId]);
   const labelContent = !!Label && <Label {...labelProps}>{labelText}</Label>;
