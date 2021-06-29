@@ -164,6 +164,7 @@ const createForm = (parentForm, options) => {
         rules,
         autoValidate,
         valueProp = options.valueProp,
+        labelProp = options.labelProp,
         changeEvent,
         defaultValue,
         classes,
@@ -177,6 +178,7 @@ const createForm = (parentForm, options) => {
         help,
         comp,
         valueProp,
+        labelProp,
         changeEvent,
         classes,
         styles,
@@ -204,7 +206,7 @@ const createForm = (parentForm, options) => {
     onSuccessOrEvent &&
       onSuccessOrEvent.preventDefault &&
       onSuccessOrEvent.preventDefault();
-    form.onSubmit && form.onSubmit(form);
+    form.onSubmit && form.onSubmit(form.value, form);
 
     return validate(form, options).then(() => {
       if (form.val.status === "valid") {
@@ -497,6 +499,7 @@ const defaultRenderField = (
     label,
     help,
     valueProp,
+    labelProp,
     changeEvent = defaultChangeEvent,
     name,
     comp = InputComponent,
@@ -533,21 +536,21 @@ const defaultRenderField = (
         );
 
   const required = rules.some((rule) => rule.required);
-  const fieldProps = mergeProps([
-    !noExtraAttrs && "className",
-    mergeClasses(
-      classes.field,
-      required && classes.required,
-      val.status && classes[val.status],
-      ...(field.classes || [])
-    ),
-  ]);
-  const labelProps = mergeProps([!noExtraAttrs && "htmlFor", fieldId]);
-  const labelContent = !!Label && (
-    <Label {...labelProps}>
-      {typeof label === "function" ? label(field) : label}
-    </Label>
+  const labelText = typeof label === "function" ? label(field) : label;
+  const fieldProps = mergeProps(
+    [
+      !noExtraAttrs && "className",
+      mergeClasses(
+        classes.field,
+        required && classes.required,
+        val.status && classes[val.status],
+        ...(field.classes || [])
+      ),
+    ],
+    [labelProp, labelText]
   );
+  const labelProps = mergeProps([!noExtraAttrs && "htmlFor", fieldId]);
+  const labelContent = !!Label && <Label {...labelProps}>{labelText}</Label>;
 
   const labelWrapperProps = mergeProps([
     !noExtraAttrs && "className",

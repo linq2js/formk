@@ -1,4 +1,5 @@
 export interface ProviderOptions {
+  noExtraAttrs?: boolean;
   autoValidateDelay?: number;
   styles?: Partial<StyleCollection>;
   classes?: Partial<ClassCollection>;
@@ -9,7 +10,8 @@ export interface ProviderOptions {
   renderForm?: RenderFormCallback;
   renderField?: RenderFieldCallback;
   messages?: Partial<ValidateMessages>;
-  valueProp?: "value";
+  valueProp?: string;
+  labelProp?: string;
   suppressWarning?: boolean;
 }
 
@@ -47,6 +49,7 @@ export interface Field {
   label: any;
   help: any;
   valueProp: string;
+  labelProp: string;
   changeEvent: string;
   defaultValue: any;
 }
@@ -107,7 +110,7 @@ export interface FormElementProps {
   name?: string | string[];
   value?: any;
   initialValue?: any;
-  onSubmit?: Callback1<Form>;
+  onSubmit?: Callback2<any, Form>;
   onSuccess?: Callback2<any, Form>;
   onError?: Callback2<Error[], Form>;
   onChange?: Callback2<any, Form>;
@@ -126,6 +129,7 @@ export interface FieldElementProps {
   rules?: Rule;
   autoValidate?: boolean;
   valueProp?: string;
+  labelProp?: string;
   changeEvent?: string;
   defaultValue?: any;
   classes?: string | string[];
