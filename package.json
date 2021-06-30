@@ -1,6 +1,6 @@
 {
   "name": "formk",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "A powerful form library for ReactJs/ReactNative",
   "main": "src/index.js",
   "types": "src/index.d.ts",

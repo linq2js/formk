@@ -69,8 +69,9 @@ const createProvider = (options = {}) => {
     },
   };
   const formContext = createContext(null);
+  const useForm = () => (useContext(formContext) || {}).form;
   const Form = (props) => {
-    const parentForm = (useContext(formContext) || {}).form;
+    const parentForm = useForm();
     const [, rerender] = stateHook({});
     const formRef = useRef();
     // create form if not any
@@ -87,7 +88,7 @@ const createProvider = (options = {}) => {
   };
 
   const Field = (props) => {
-    const parentForm = (useContext(formContext) || {}).form;
+    const parentForm = useForm();
     const [, rerender] = stateHook(emptyObject);
     if (!parentForm) return null;
     return parentForm.render("field", props, rerender, formContext);
@@ -97,7 +98,7 @@ const createProvider = (options = {}) => {
     return <Field {...props}>{children}</Field>;
   };
 
-  return { Form, Field, $field: fieldHelper };
+  return { Form, Field, $field: fieldHelper, useForm };
 };
 
 const createForm = (parentForm, options) => {
