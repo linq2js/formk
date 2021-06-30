@@ -195,6 +195,10 @@ export type FieldElement = (props?: FieldElementProps) => any;
 export interface FormProvider {
   Form: FormElement;
   Field: FieldElement;
+  $field(
+    props: FieldElementProps,
+    content: (field: Field) => any
+  ): FieldElement;
 }
 
 export type ValidateMessage = string | (() => string);
