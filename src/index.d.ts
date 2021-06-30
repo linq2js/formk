@@ -31,7 +31,7 @@ export interface Form extends FormItem {
   parent: Form;
   fields: { [key: string]: Field };
   reset(): void;
-  merge(value): void;
+  merge(value, ...unset: (string | number)[]): void;
   handleSubmit(e?: Event): void;
   handleSubmit(
     onSuccess: Callback2<any, Form>,

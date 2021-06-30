@@ -93,7 +93,11 @@ const createProvider = (options = {}) => {
     return parentForm.render("field", props, rerender, formContext);
   };
 
-  return { Form, Field };
+  const fieldHelper = (props, children) => {
+    return <Field {...props}>{children}</Field>;
+  };
+
+  return { Form, Field, $field: fieldHelper };
 };
 
 const createForm = (parentForm, options) => {
@@ -260,8 +264,10 @@ const createForm = (parentForm, options) => {
     updateForm(form.initialValue || emptyObject);
   };
 
-  const merge = (value) => {
-    updateForm({ ...form.value, ...value });
+  const merge = (value, ...unsetKeys) => {
+    const nextValue = { ...form.value, ...value };
+    unsetKeys.forEach((key) => delete nextValue[key]);
+    updateForm(nextValue);
   };
 
   const form = {
@@ -426,7 +432,19 @@ const createField = (form, options) => {
     get dirty() {
       return field.value !== field.initialValue;
     },
-    getProps(valueProp = "value", changeEvent = "onChange") {
+    $errors(Component, props) {
+      return (
+        field.val.status === "invalid" &&
+        field.val.errors.map((error) => (
+          <Component
+            {...(typeof props === "function" ? props(error, field) : props)}
+          >
+            {error.message}
+          </Component>
+        ))
+      );
+    },
+    $props(valueProp = "value", changeEvent = "onChange") {
       return {
         [valueProp]: field.value,
         [changeEvent]: field.handleChange,

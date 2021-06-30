@@ -37,8 +37,8 @@ test("todo-app", async () => {
                 // sub form
                 <Fragment key={index}>
                   <Field name={["todos", index]}>
-                    {({ getProps }) => (
-                      <input {...getProps()} className={`item item-${index}`} />
+                    {({ $props }) => (
+                      <input {...$props()} className={`item item-${index}`} />
                     )}
                   </Field>
                   <button
